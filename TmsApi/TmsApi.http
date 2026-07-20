@@ -1,5 +1,46 @@
 @TmsApi_HostAddress = http://localhost:5263
 
-GET {{TmsApi_HostAddress}}/api/assessments/results 
+GET {{TmsApi_HostAddress}}/api/enrollments/test-log
+# Accept: application/json
+# X-Training-User:andi
+###
+
+GET {{TmsApi_HostAddress}}/api/assessments/results
+Accept: application/json
+X-Training-User:andi
+###
+@TmsApi_HostAddress = http://localhost:5263
+
+GET {{TmsApi_HostAddress}}/api/enrollments/worker-smoke
+X-Training-User: Andinet
+Accept: application/json
 
 ###
+### Create
+POST {{TmsApi_HostAddress}}/api/enrollments
+Content-Type: application/json
+X-Training-User: andi
+
+{
+  "studentId": "S-001",
+  "courseCode": "CS-101"
+}
+### 2. Get by that id
+GET {{TmsApi_HostAddress}}/api/enrollments/e76baf83
+X-Training-User: andi
+
+### 3. Get all
+GET {{TmsApi_HostAddress}}/api/enrollments/does-not-exist
+X-Training-User: andi
+//does-not-exist
+
+
+
+### 4. Delete it
+DELETE {{TmsApi_HostAddress}}/api/enrollments/e76baf83
+X-Training-User: andi
+
+### 5. Get it again — should now 404
+GET {{TmsApi_HostAddress}}/api/enrollments/e76baf83
+X-Training-User: andi
+

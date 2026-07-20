@@ -3,8 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-public class TrainingAuthHandler
-    : AuthenticationHandler<AuthenticationSchemeOptions>
+public class TrainingAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     public TrainingAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -18,8 +17,7 @@ public class TrainingAuthHandler
     {
         if (!Request.Headers.ContainsKey("X-Training-User"))
         {
-            return Task.FromResult(
-                AuthenticateResult.Fail("Missing training user header."));
+            return Task.FromResult(AuthenticateResult.Fail("Missing training user header."));
         }
 
         var claims = new[]
@@ -31,7 +29,6 @@ public class TrainingAuthHandler
         var principal = new ClaimsPrincipal(identity);
         var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
-        return Task.FromResult(
-            AuthenticateResult.Success(ticket));
+        return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }
