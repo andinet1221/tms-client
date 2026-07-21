@@ -5,6 +5,8 @@ using TmsApi.Data;
 using TmsApi.Entities;
 using TmsApi.Services;
 using TmsApi.Filters;
+using Asp.Versioning;
+using TmsApi.Middleware; // <-- added: needed for V1DeprecationMiddleware
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,14 +19,16 @@ builder.Services
     .AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>(
         "Training", null);
 
-        builder.Services.AddOptions<PaymentOptions>()
+builder.Services.AddOptions<PaymentOptions>()
     .BindConfiguration("Payments")
     .ValidateDataAnnotations()
     .ValidateOnStart();
-   builder.Services.AddDbContext<TmsDbContext>(options =>
+
+builder.Services.AddDbContext<TmsDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("TmsDatabase"))
         .LogTo(Console.WriteLine, LogLevel.Information)
         .EnableSensitiveDataLogging());
+
 builder.Services.AddProblemDetails();
 builder.Services.AddAuthorization();
 // builder.Services.AddControllers();
@@ -32,6 +36,38 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<AuditLogFilter>();
 });
+
+//excersice 7
+builder.Services.AddOpenApi("v1", options =>
+{
+    options.ShouldInclude = description =>
+        description.GroupName == "v1";
+});
+
+builder.Services.AddOpenApi("v2", options =>
+{
+    options.ShouldInclude = description =>
+        description.GroupName == "v2";
+});
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+
+    options.AssumeDefaultVersionWhenUnspecified = true;
+
+    options.ReportApiVersions = true;
+
+options.ApiVersionReader = ApiVersionReader.Combine(
+    new UrlSegmentApiVersionReader(),
+    new HeaderApiVersionReader("X-Api-Version"));})
+.AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+
+    options.SubstituteApiVersionInUrl = true;
+});
+
 // Dependency Injection
 builder.Services.AddScoped<TmsApi.Services.IEnrollmentService, TmsApi.Services.EnrollmentService>();
 builder.Services.AddSingleton<EnrollmentWorker>();
@@ -64,18 +100,26 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 // app.UseStatusCodePages();
 //app.UseHttpsRedirection();
 
-
-
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.MapOpenApi();
-    app.MapScalarApiReference();
 }
 else
 {
     app.UseExceptionHandler();
 }
+
+app.MapScalarApiReference(options =>
+{
+    options.WithTitle("TMS API Reference")
+           .WithTheme(ScalarTheme.DeepSpace)
+           .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+
+    options
+        .AddDocument("v1", "API Version 1.0")
+        .AddDocument("v2", "API Version 2.0");
+});
 
 app.UseStatusCodePages();
 
@@ -83,10 +127,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<V1DeprecationMiddleware>();
 app.MapControllers();
-
-
 
 
 // --------------------
@@ -125,7 +167,6 @@ if (app.Environment.IsDevelopment())
 
     await DataSeeder.SeedAsync(context);
 }
-
 
 
 // --------------------
@@ -182,7 +223,6 @@ using (var scope = app.Services.CreateScope())
         context.Enrollments.AddRange(enrollments);
         context.SaveChanges();
     }
-    
 }
 
 
