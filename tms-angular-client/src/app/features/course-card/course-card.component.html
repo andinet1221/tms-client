@@ -1,0 +1,29 @@
+<div class="course-card">
+
+<h3>
+{{course.title}}
+</h3>
+
+
+<p>
+Code: {{course.code}}
+</p>
+
+
+<p>
+Capacity:
+{{course.enrollmentCount}}
+/
+{{course.maxCapacity}}
+</p>
+
+
+<button
+(click)="enroll()">
+
+Enroll
+
+</button>
+
+
+</div>

@@ -5,11 +5,11 @@ import { RouterLink } from '@angular/router';
 import { inject } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { CourseService } from '../../services/course.service';
-
+import { EnrollmentListComponent } from '../enrollment-list/enrollment-list.component';
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [
+  imports: [EnrollmentListComponent,
     CourseCardComponent
   ],
   templateUrl: './student-dashboard.component.html',

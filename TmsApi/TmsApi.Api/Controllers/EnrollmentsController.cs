@@ -161,4 +161,36 @@ public class EnrollmentsController(
 
         return Ok(schedule);
     }
+    [HttpGet]
+public IActionResult GetAll()
+{
+    return Ok(new[]
+    {
+        new
+        {
+            id = "1",
+            studentId = 1,
+            studentName = "Liya",
+            courseId = 1,
+            courseName = "Advanced Java Services",
+            status = "Pending",
+            enrolledAt = DateTime.UtcNow
+        },
+        new
+        {
+            id = "2",
+            studentId = 2,
+            studentName = "Dawit",
+            courseId = 2,
+            courseName = "Angular UI Lab",
+            status = "Approved",
+            enrolledAt = DateTime.UtcNow
+        }
+    });
+}
+[HttpPost("{id}/approve")]
+public IActionResult Approve(string id)
+{
+    return NoContent();
+}
 }
